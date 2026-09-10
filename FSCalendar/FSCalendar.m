@@ -688,6 +688,14 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     [self setScope:scope animated:NO];
 }
 
+- (void)setWeekdaySymbols:(NSArray<NSString *> *)weekdaySymbols
+{
+    if (_weekdaySymbols != weekdaySymbols && ![_weekdaySymbols isEqualToArray:weekdaySymbols]) {
+        _weekdaySymbols = weekdaySymbols.copy;
+        [self.calendarWeekdayView configureAppearance];
+    }
+}
+
 - (void)setFirstWeekday:(NSUInteger)firstWeekday
 {
     if (_firstWeekday != firstWeekday) {

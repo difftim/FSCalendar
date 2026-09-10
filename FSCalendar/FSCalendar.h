@@ -333,6 +333,17 @@ IB_DESIGNABLE
 @property (assign, nonatomic) IBInspectable NSUInteger firstWeekday;
 
 /**
+ Weekday symbols to display instead of the ones the locale provides. Supply
+ exactly seven, Sunday first — `firstWeekday` still decides which one heads the
+ row. Anything else, or nil, falls back to the locale's own symbols.
+
+ Use this when the app owns its weekday strings, for example to show a
+ two-letter form the locale does not offer, or to follow an in-app language
+ setting rather than the device's.
+ */
+@property (copy, nonatomic, nullable) NSArray<NSString *> *weekdaySymbols;
+
+/**
  The height of month header of the calendar. Give a '0' to remove the header.
  */
 @property (assign, nonatomic) IBInspectable CGFloat headerHeight;

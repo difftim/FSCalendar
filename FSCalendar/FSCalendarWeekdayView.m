@@ -98,6 +98,11 @@
 
 - (void)configureAppearance
 {
+    // Symbols the host supplied win outright: they are already in the form and
+    // the language it wants, so neither the case options nor the locale apply.
+    NSArray<NSString *> *overrideSymbols = self.calendar.weekdaySymbols;
+    BOOL useOverride = overrideSymbols.count == 7;
+
     BOOL useVeryShortWeekdaySymbols = (self.calendar.appearance.caseOptions & (15<<4) ) == FSCalendarCaseOptionsWeekdayUsesSingleUpperCase;
     NSArray *weekdaySymbols = useVeryShortWeekdaySymbols ? self.calendar.gregorian.veryShortStandaloneWeekdaySymbols : self.calendar.gregorian.shortStandaloneWeekdaySymbols;
     BOOL useDefaultWeekdayCase = (self.calendar.appearance.caseOptions & (15<<4) ) == FSCalendarCaseOptionsWeekdayUsesDefaultCase;
@@ -107,7 +112,11 @@
         UILabel *label = [self.weekdayPointers pointerAtIndex:i];
         label.font = self.calendar.appearance.weekdayFont;
         label.textColor = self.calendar.appearance.weekdayTextColor;
-        label.text = useDefaultWeekdayCase ? weekdaySymbols[index] : [weekdaySymbols[index] uppercaseString];
+        if (useOverride) {
+            label.text = overrideSymbols[index];
+        } else {
+            label.text = useDefaultWeekdayCase ? weekdaySymbols[index] : [weekdaySymbols[index] uppercaseString];
+        }
     }
 
 }
