@@ -295,7 +295,9 @@
                         NSInteger countDelta = (NSInteger)ceil(widthDelta/self.estimatedItemSize.width);
                         endColumn = endSection*7 + countDelta - 1;
                     }
-                    endColumn;
+                    // At the content's end `maxX/pageWidth` can land a hair past
+                    // the last section; never ask for a section that is not there.
+                    MIN(endColumn, self.numberOfSections*7 - 1);
                 });
                 
                 NSInteger numberOfRows = self.calendar.transitionCoordinator.representingScope == FSCalendarScopeMonth ? 6 : 1;
@@ -344,7 +346,7 @@
                         NSInteger countDelta = (NSInteger)ceil(heightDelta/self.estimatedItemSize.height);
                         endRow = endSection*6 + countDelta - 1;
                     }
-                    endRow;
+                    MIN(endRow, self.numberOfSections*6 - 1);
                 });
                 
                 for (NSInteger row = startRow; row <= endRow; row++) {
