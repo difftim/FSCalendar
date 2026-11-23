@@ -267,27 +267,33 @@
         switch (self.scrollDirection) {
             case UICollectionViewScrollDirectionHorizontal: {
                 
+                // Offsets reach hundreds of thousands of points and page sizes can
+                // be fractional, so `fmodf` may return a whole page instead of zero
+                // and skip every column but the last. Measure each in-page offset
+                // from the section it belongs to, in CGFloat.
+                CGFloat pageWidth = self.collectionView.fs_width;
                 NSInteger startColumn = ({
-                    NSInteger startSection = rect.origin.x/self.collectionView.fs_width;
-                    CGFloat widthDelta = FSCalendarMod(CGRectGetMinX(rect), self.collectionView.fs_width)-self.sectionInsets.left;
-                    widthDelta = MIN(MAX(0, widthDelta), self.collectionView.fs_width-self.sectionInsets.left);
-                    NSInteger countDelta = FSCalendarFloor(widthDelta/self.estimatedItemSize.width);
+                    NSInteger startSection = (NSInteger)floor(CGRectGetMinX(rect)/pageWidth);
+                    CGFloat widthDelta = CGRectGetMinX(rect) - startSection*pageWidth - self.sectionInsets.left;
+                    widthDelta = MIN(MAX(0, widthDelta), pageWidth - self.sectionInsets.left);
+                    NSInteger countDelta = (NSInteger)floor(widthDelta/self.estimatedItemSize.width);
                     NSInteger startColumn = startSection*7 + countDelta;
                     startColumn;
                 });
-                
+
                 NSInteger endColumn = ({
                     NSInteger endColumn;
-                    CGFloat section = CGRectGetMaxX(rect)/self.collectionView.fs_width;
-                    CGFloat remainder = FSCalendarMod(section, 1);
+                    CGFloat section = CGRectGetMaxX(rect)/pageWidth;
+                    NSInteger endSection = (NSInteger)floor(section);
+                    CGFloat remainder = section - endSection;
                     // https://stackoverflow.com/a/10335601/2398107
                     if (remainder <= MAX(100*FLT_EPSILON*ABS(remainder), FLT_MIN)) {
-                        endColumn = FSCalendarFloor(section)*7 - 1;
+                        endColumn = endSection*7 - 1;
                     } else {
-                        CGFloat widthDelta = FSCalendarMod(CGRectGetMaxX(rect), self.collectionView.fs_width)-self.sectionInsets.left;
-                        widthDelta = MIN(MAX(0, widthDelta), self.collectionView.fs_width - self.sectionInsets.left);
-                        NSInteger countDelta = FSCalendarCeil(widthDelta/self.estimatedItemSize.width);
-                        endColumn = FSCalendarFloor(section)*7 + countDelta - 1;
+                        CGFloat widthDelta = CGRectGetMaxX(rect) - endSection*pageWidth - self.sectionInsets.left;
+                        widthDelta = MIN(MAX(0, widthDelta), pageWidth - self.sectionInsets.left);
+                        NSInteger countDelta = (NSInteger)ceil(widthDelta/self.estimatedItemSize.width);
+                        endColumn = endSection*7 + countDelta - 1;
                     }
                     endColumn;
                 });
@@ -313,27 +319,30 @@
             }
             case UICollectionViewScrollDirectionVertical: {
                 
+                // Same precision concern as the horizontal case above.
+                CGFloat pageHeight = self.collectionView.fs_height;
                 NSInteger startRow = ({
-                    NSInteger startSection = rect.origin.y/self.collectionView.fs_height;
-                    CGFloat heightDelta = FSCalendarMod(CGRectGetMinY(rect), self.collectionView.fs_height)-self.sectionInsets.top;
-                    heightDelta = MIN(MAX(0, heightDelta), self.collectionView.fs_height-self.sectionInsets.top);
-                    NSInteger countDelta = FSCalendarFloor(heightDelta/self.estimatedItemSize.height);
+                    NSInteger startSection = (NSInteger)floor(CGRectGetMinY(rect)/pageHeight);
+                    CGFloat heightDelta = CGRectGetMinY(rect) - startSection*pageHeight - self.sectionInsets.top;
+                    heightDelta = MIN(MAX(0, heightDelta), pageHeight - self.sectionInsets.top);
+                    NSInteger countDelta = (NSInteger)floor(heightDelta/self.estimatedItemSize.height);
                     NSInteger startRow = startSection*6 + countDelta;
                     startRow;
                 });
-                
+
                 NSInteger endRow = ({
                     NSInteger endRow;
-                    CGFloat section = CGRectGetMaxY(rect)/self.collectionView.fs_height;
-                    CGFloat remainder = FSCalendarMod(section, 1);
+                    CGFloat section = CGRectGetMaxY(rect)/pageHeight;
+                    NSInteger endSection = (NSInteger)floor(section);
+                    CGFloat remainder = section - endSection;
                     // https://stackoverflow.com/a/10335601/2398107
                     if (remainder <= MAX(100*FLT_EPSILON*ABS(remainder), FLT_MIN)) {
-                        endRow = FSCalendarFloor(section)*6 - 1;
+                        endRow = endSection*6 - 1;
                     } else {
-                        CGFloat heightDelta = FSCalendarMod(CGRectGetMaxY(rect), self.collectionView.fs_height)-self.sectionInsets.top;
-                        heightDelta = MIN(MAX(0, heightDelta), self.collectionView.fs_height-self.sectionInsets.top);
-                        NSInteger countDelta = FSCalendarCeil(heightDelta/self.estimatedItemSize.height);
-                        endRow = FSCalendarFloor(section)*6 + countDelta-1;
+                        CGFloat heightDelta = CGRectGetMaxY(rect) - endSection*pageHeight - self.sectionInsets.top;
+                        heightDelta = MIN(MAX(0, heightDelta), pageHeight - self.sectionInsets.top);
+                        NSInteger countDelta = (NSInteger)ceil(heightDelta/self.estimatedItemSize.height);
+                        endRow = endSection*6 + countDelta - 1;
                     }
                     endRow;
                 });
